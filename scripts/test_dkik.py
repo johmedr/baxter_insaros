@@ -1,3 +1,7 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+import struct
+import sys
 import rospy 
 
 from geometry_msgs.msg import (
@@ -13,11 +17,13 @@ from baxter_core_msgs.srv import (
     SolvePositionIKRequest,
 )
 
-def make_init_poses(limb, timestamp=rospy.Time.now()): 
-    hdr = Header(stamp=timestamp, frame_id='base')
-	poses = { 
-		'left': PoseStamped(
-			header=hdr,
+from baxter_insaros import limb_ik_request
+
+def make_init_poses(): 
+    hdr = Header(stamp=rospy.Time.now(), frame_id='base')
+    poses = {
+        'left': PoseStamped(
+            header=hdr,
             pose=Pose(
                 position=Point(
                     x=0.657579481614,
@@ -51,39 +57,17 @@ def make_init_poses(limb, timestamp=rospy.Time.now()):
     }
     return poses 
 
+def main(): 
+    rospy.init_node("test_dkik")
+    poses = make_init_poses()
+    left_joints = limb_ik_request('left', poses)
+    right_joints = limb_ik_request('right', poses)
 
-def limb_ik_request(limb, target_pose):
-	assert(limb == 'left' or limb == 'right')
+    print("LEFT SIDE : ")
+    print(left_joints)
+    
+    print("RIGHT SIDE : ")
+    print(right_joints)
 
-	assert(type(target_pose) == dict)
-	assert('left' in target_pose) 
-	assert('right' in target_pose)
-
-	# ns service name
-	ns = "ExternalTools/" + limb + "/PositionKinematicsNode/IKService"
-	ik_service = rospy.ServiceProxy(ns, SolvePositionIK)
-	ik_request = SolvePositionIKRequest()
-	ik_request.pose_stamp.append(target_pose[limb])
-	try: 
-		rospy.wait_for_service(ns, 5.0)
-		ik_response = ik_service(ik_request)
-	except (rospy.ServiceException, rospy.ROSException), e:
-		rospy.logerr("Service call failed: %s", e)
-
-    resp_seeds = struct.unpack('<%dB' % len(resp.result_type),
-                           resp.result_type)
-
-    # Check IK solver answer's validity
-    if (resp_seeds[0] != resp.RESULT_INVALID): 
-        seed_str = {
-            ikreq.SEED_USER: 'User Provided Seed',
-            ikreq.SEED_CURRENT: 'Current Joint Angles',
-            ikreq.SEED_NS_MAP: 'Nullspace Setpoints',
-           }.get(resp_seeds[0], 'None')
-
-		limb_joints = dict(zip(resp.joints[0].name, resp.joints[0].position))
-
-    else: 
-    	rospy.logerr("Invalid target pose for limb %s", limb)
-
-    return 
+if __name__ == '__main__': 
+    sys.exit(main())
