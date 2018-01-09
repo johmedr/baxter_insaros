@@ -1,13 +1,26 @@
 import struct
 import rospy
 
-from geometry_msgs.msg import Pose
+from geometry_msgs.msg import Pose , PoseStamped
+from std_msgs.msg import Header
 
 from baxter_core_msgs.srv import (
     SolvePositionIK, 
     SolvePositionIKRequest,
 )
 
+def make_poses(leftpose=None, rightpose=None): 
+    assert(leftpose is not None or rightpose is not None)
+    hdr = Header(stamp=rospy.Time.now(), frame_id='base')
+    poses = {'left': PoseStamped(
+        header=hdr, 
+        pose=Pose() if leftpose is None else leftpose
+        ), 
+             'right': PoseStamped(
+        header=hdr, 
+        pose=Pose() if rightpose is None else rightpose
+        )}
+    return poses
 
 def limb_ik_request(limb, target_pose):
     assert(limb == 'left' or limb == 'right')
