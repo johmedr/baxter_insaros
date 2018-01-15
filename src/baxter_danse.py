@@ -6,9 +6,9 @@ import moveit_msgs.msg
 import geometry_msgs.msg
 
 import baxter_insaros.utils as utils
+import baxter_insaros as bir
+
 from exceptions import TypeError 
-from threading import Thread
-import time
 
 
 if __name__ == "__main__":
@@ -35,7 +35,7 @@ if __name__ == "__main__":
 	                                    moveit_msgs.msg.DisplayTrajectory)
 
 	print "============ Waiting for RVIZ..."
-	#rospy.sleep(10)
+	#rospy.sleep(10) 
 	print "============ Starting dancing "
 
 	print "============ Reference frame: %s" % groupL.get_planning_frame()
@@ -69,8 +69,8 @@ if __name__ == "__main__":
 	# print joint_solution_L
 
 	# Joint-space planing request
-	if joint_solution_L is None: 
-		raise TypeError("Joint solution is None.")
+	# if joint_solution_L is None: 
+		# raise TypeError("Joint solution is None.")
 	# groupL.set_joint_value_target(joint_solution_L)
 
 
@@ -95,17 +95,19 @@ if __name__ == "__main__":
 	joint_solution_R = utils.limb_ik_request('right', utils.make_poses(rightpose=poseR_target))
 
 
-	if joint_solution_R is None: 
-		raise TypeError("Joint solution is None.")
+	# if joint_solution_R is None: 
+		# raise TypeError("Joint solution is None.")
 
 	# groupR.set_joint_value_target(joint_solution_R)
 
 	# planL = groupL.plan()
 	# planR = groupR.plan()
 
-	joint_solution = dict() 
-	joint_solution.update(joint_solution_L)
-	joint_solution.update(joint_solution_R)
+	# joint_solution = dict() 
+	# joint_solution.update(joint_solution_L)
+	# joint_solution.update(joint_solution_R)
+
+	joint_solution = bir.ik_solve(target_pose_left=poseL_target, target_pose_right=poseR_target)
 
 	print "==== JointSolution : ", joint_solution
 
@@ -122,7 +124,7 @@ if __name__ == "__main__":
 			groupBothArms.go(wait=True)
 
 		elif usr == 'repeat' or usr == 'r': 
-			
+
 			groupBothArms.set_joint_value_target(joint_solution) 
 			groupBothArms.plan()
 
