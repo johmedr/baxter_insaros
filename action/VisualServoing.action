@@ -1,0 +1,7 @@
+uint32 goal_u
+uint32 goal_v
+uint32 resolution
+---
+bool success 
+---
+uint32 loop_nb
