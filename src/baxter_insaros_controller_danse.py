@@ -29,26 +29,26 @@ if __name__ == "__main__":
 
 	poseL_target = geometry_msgs.msg.Pose()
 
-	poseL_target.orientation.x = 0.140
-	poseL_target.orientation.y = -0.980
-	poseL_target.orientation.z = -0.013
-	poseL_target.orientation.w = -0.027
+	poseL_target.orientation.x = -0.5
+	poseL_target.orientation.y = 0.81
+	poseL_target.orientation.z = -0.26
+	poseL_target.orientation.w = -0.09
 
-	poseL_target.position.x = 0.127579481614
-	poseL_target.position.y = 0.651981417433
-	poseL_target.position.z = -0.1988352386502
+	poseL_target.position.x = 0.57
+	poseL_target.position.y = 0.10
+	poseL_target.position.z = 0.05
 
 
 	#print "============ Generating plan R"
 	poseR_target = geometry_msgs.msg.Pose()
-	poseR_target.orientation.w = -0.0034
-	poseR_target.orientation.x = 0.5
-	poseR_target.orientation.y = 0.86
-	poseR_target.orientation.z = -0.0055
+	poseR_target.orientation.x = 0.61
+	poseR_target.orientation.y = 0.74
+	poseR_target.orientation.z = 0.26
+	poseR_target.orientation.w = 0.02
 
-	poseR_target.position.x = 0.077
-	poseR_target.position.y = - 0.5
-	poseR_target.position.z = - 0.2
+	poseR_target.position.x = 0.60
+	poseR_target.position.y = -0.05
+	poseR_target.position.z = 0.05
 
 	bir_commander.set_target_pose(target_pose_left=poseL_target, target_pose_right=poseR_target)
 	plan = bir_commander.plan()

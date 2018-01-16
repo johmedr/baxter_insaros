@@ -72,13 +72,13 @@ class BaxterInsarosCommander:
 
             if self._right_target_pose is not None:
                 joint_target_right = ik_solve(
-                    target_pose_left=self._right_target_pose)
+                    target_pose_right=self._right_target_pose)
                 if bool(joint_target_right):
                     joint_target.update(joint_target_right)
                     self._last_group = "both_arms" if self._last_group == "left_arm" else "right_arm"
-
+                # NONE non traite
             self._group_commanders[self._last_group].set_joint_value_target(
-                joint_target_left)
+                joint_target)
 
             self._target_poses_affected_to_commander = True
 
