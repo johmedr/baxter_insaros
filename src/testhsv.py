@@ -8,8 +8,11 @@ import cv2
 import sys
 import rospy
 from cv_bridge import CvBridge, CvBridgeError
+
 from std_msgs.msg import String
+from geometry_msgs.msg import Point
 from sensor_msgs.msg import Image
+
 # import packages tuto
 import baxter_interface
 import baxter_pykdl
@@ -48,7 +51,12 @@ class image_converter:
     # if a video path was not supplied, grab the reference
     # to the webcam
     self.bridge = CvBridge()
+    
     self.image_sub = rospy.Subscriber("/cameras/left_hand_camera/image",Image,self.callback)
+    #self.caminfo_sub = rospy.Subscriber("/cameras/left_hand_camera/camera_info_std",Image,self.callback)
+
+    self.point_pub = rospy.Publisher("/baxter_visual_srv/left_cam/object_center", Point, queue_size=10) 
+
     self.state = 0
     
   def my_ik(self):
@@ -82,7 +90,6 @@ class image_converter:
     
     limbL.move_to_joint_positions(poseL)
 
-
   def callback(self,data):
     if self.state==0:
       self.callback_go_to_init_pos()
@@ -90,7 +97,9 @@ class image_converter:
       self.callback_vs(data)
 
   def callback_go_to_init_pos(self):
-    self.my_ik()
+    self.state = 1 # assume is already in init pos
+     
+    #self.my_ik()
     # if distance between current EE position
     # and desired EE position < epsilon
     # state should be equal to one.
@@ -113,6 +122,8 @@ class image_converter:
     mask = cv2.dilate(mask, None, iterations=2)
     
     cv2.imshow("Mask", mask)
+
+
     # find contours in the mask and initialize the current
     # (x, y) center of the ball
     cnts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL,
@@ -128,6 +139,9 @@ class image_converter:
       M = cv2.moments(c)
       center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
       print(center) 
+      
+      center_point = Point(x=center[0], y=center[1], z=0) 
+      self.point_pub.publish(center_point); 
       
       # only proceed if the radius meets a minimum size
       if radius > 10:
@@ -155,13 +169,14 @@ class image_converter:
     # show the frame to our screen
     cv2.imshow("Frame", frame)
     key = cv2.waitKey(1) & 0xFF
-
+ 
 def main():
   print("Start")
   ic = image_converter()
   rospy.init_node('image_converter', anonymous=True)
   #rs = baxter_interface.RobotEnable(CHECK_VERSION)
   #init_state = rs.state().enabled
+
   
   print("After image converter")
   def clean_shutdown():
