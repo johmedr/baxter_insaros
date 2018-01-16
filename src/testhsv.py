@@ -53,12 +53,20 @@ class image_converter:
     self.bridge = CvBridge()
     
     self.image_sub = rospy.Subscriber("/cameras/left_hand_camera/image",Image,self.callback)
-    #self.caminfo_sub = rospy.Subscriber("/cameras/left_hand_camera/camera_info_std",Image,self.callback)
 
+    # Create a param for camera_intrinsics 
+    # Found in /cameras/left_hand_camera/camera_info_std 
+    self.cam_intrinsics = np.array([[406.108727421, 0.0, 649.849412303, 0.0], 
+                                    [0.0, 406.108727421, 415.309603187, 0.0], 
+                                    [0.0, 0.0, 1.0, 0.0]]) 
+                                
     self.point_pub = rospy.Publisher("/baxter_visual_srv/left_cam/object_center", Point, queue_size=10) 
 
     self.state = 0
-    
+  
+  def fill_intrinsics_cb(self, data): 
+    self.self.cam_intrinsics = data.P
+
   def my_ik(self):
     rs = baxter_interface.RobotEnable(baxter_interface.CHECK_VERSION)
     init_state = rs.state().enabled
